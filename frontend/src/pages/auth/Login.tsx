@@ -1,7 +1,11 @@
 import LoginForm from "@/components/auth/login-form"
+import { useEffect } from "react"
 
+export default function Login(){
+    useEffect(() => {
+        document.title = "Login | AuthStack"
+    }, [])
 
-export default function Login({ className, ...props }: React.ComponentProps<"div">){
     return (
         <LoginForm />
     )
