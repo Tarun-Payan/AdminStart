@@ -1,8 +1,8 @@
-import { ZodObject } from "zod";
-import type { Request, Response, NextFunction } from "express";
+import z from "zod";
+import type { Request, Response, NextFunction, RequestHandler } from "express";
 import { errorResponse, formatValidationErrors } from "../services/responseService.js";
 
-export function validateBody(schema: ZodObject<any>) {
+export function validateBody<T extends z.ZodTypeAny>(schema: T): RequestHandler {
     return (req: Request, res: Response, next: NextFunction) => {
         const result = schema.safeParse(req.body);
 

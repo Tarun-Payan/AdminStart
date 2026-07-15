@@ -2,7 +2,8 @@
 // which patches the Zod prototype. All schema files that call .openapi()
 // must be imported AFTER this.
 import "./src/openapi/init.js";
-import "./src/routes/auth.openapi.js";
+import "./src/openapi/auth.openapi.js";
+import { errorHandler } from "./src/middleware/errorHandler.js";
 import express from 'express';
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
@@ -40,6 +41,8 @@ app.get("/swagger.json", (_, res) => {
 });
 
 app.use('/api', apis);
+
+app.use(errorHandler);
 
 app.get('/', (req, res) => {
   res.setHeader('Content-Type', 'text/plain')

@@ -5,7 +5,7 @@ export type ApiResponse<T = unknown> = {
   success: boolean;
   message: string;
   data: T | null;
-  errors?: unknown[];
+  errors?: ValidationErrorItem[];
 };
 
 export type ValidationErrorItem = {
@@ -57,7 +57,7 @@ export function errorResponse(
   res: Response<ApiResponse<null>>,
   status: number,
   message: string,
-  errors: unknown[] = []
+  errors: ValidationErrorItem[] = []
 ): Response<ApiResponse<null>> {
   return res.status(status).json({
     success: false,
@@ -70,9 +70,10 @@ export function errorResponse(
 export function successResponse<T = unknown>(
   res: Response<ApiResponse<T>>,
   data: T | null = null,
-  message = "Success"
+  message = "Success",
+  status = 200
 ): Response<ApiResponse<T>> {
-  return res.status(200).json({
+  return res.status(status).json({
     success: true,
     message,
     data,
