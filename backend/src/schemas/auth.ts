@@ -10,9 +10,15 @@ export const RegisterSchema = BaseUserSchema.extend({
     password: z.string().min(6)
 }).openapi("Register")
 
+export const LoginSchema = z.object({
+    email: z.string(),
+    password: z.string().min(6)
+}).openapi("Login")
+
 export const UserResponseSchema = BaseUserSchema.extend({
     id: z.number().int().positive(),
 }).openapi("UserResponse")
 
 export type RegisterInput = z.infer<typeof RegisterSchema>;
+export type LoginInput = z.infer<typeof LoginSchema>;
 export type UserResponseType = z.infer<typeof UserResponseSchema>;

@@ -3,6 +3,7 @@ import { findUserByEmail        , createUser } from "../repository/userRepositor
 import { ConflictError } from "../errors/ConflictError.js";
 import bcrypt from "bcrypt";
 import { generateToken } from "./jwtService.js";
+import { UnauthorizedError } from "../errors/UnauthorizedError.js";
 
 export async function register(user: RegisterInput) {
     // check if user already exists
@@ -30,5 +31,23 @@ export async function register(user: RegisterInput) {
     const token = generateToken({ sub: createdUser.id });
 
     const { password, ...userNew } = createdUser;
+    return { user: userNew, token };
+}
+
+export async function login(user: { email: string; password: string }) {
+    const existingUser = await findUserByEmail(user.email);
+    const foundUser = existingUser[0];
+    if (!foundUser) {
+        throw new UnauthorizedError("Invalid credentials");
+    }
+
+    const isPasswordValid = await bcrypt.compare(user.password, foundUser.password);
+    if (!isPasswordValid) {
+        throw new UnauthorizedError("Invalid credentials");
+    }
+
+    const token = generateToken({ sub: foundUser.id });
+
+    const { password, ...userNew } = foundUser;
     return { user: userNew, token };
 }

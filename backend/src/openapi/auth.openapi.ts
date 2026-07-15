@@ -5,7 +5,7 @@ import {
     createResponse,
     createSuccessResponseSchema,
 } from "./responseSchemas.js";
-import { RegisterSchema, UserResponseSchema } from "../schemas/auth.js";
+import { RegisterSchema, UserResponseSchema, LoginSchema } from "../schemas/auth.js";
 
 const RegisterResponseDataSchema = z.object({
     user: UserResponseSchema,
@@ -39,6 +39,31 @@ registry.registerPath({
         201: createResponse("User registered successfully", RegisterSuccessResponseSchema),
         400: createErrorResponse("Validation failed"),
         409: createErrorResponse("User already exists"),
+        500: createErrorResponse("Internal server error"),
+    },
+});
+
+registry.registerPath({
+    method: "post",
+    path: "/api/login",
+
+    tags: ["Auth"],
+
+    summary: "Login User",
+
+    request: {
+        body: {
+            content: {
+                "application/json": {
+                    schema: LoginSchema,
+                },
+            },
+        },
+    },
+    responses: {
+        200: createResponse("User logged in successfully", RegisterSuccessResponseSchema),
+        400: createErrorResponse("Validation failed"),
+        401: createErrorResponse("Invalid credentials"),
         500: createErrorResponse("Internal server error"),
     },
 });
