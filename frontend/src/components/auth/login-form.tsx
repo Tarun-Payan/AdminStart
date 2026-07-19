@@ -1,8 +1,15 @@
+import { useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Controller, useForm, type SubmitHandler } from "react-hook-form"
+import { EyeIcon, EyeOffIcon } from "lucide-react"
+import { loginSchema, type LoginFormValues } from "@/validator/auth.schema"
+import { useAuth } from "@/hooks/useAuth"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator
@@ -10,17 +17,34 @@ import {
 import { cn } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
 import { Link } from "react-router";
-
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
+import { Spinner } from "../ui/spinner"
 
 export default function LoginForm({ 
     className, 
     ...props 
 }: React.ComponentProps<"div">){
+    const { login } = useAuth()
+    const [showPassword, setShowPassword] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+    const form = useForm<LoginFormValues>({
+        resolver: zodResolver(loginSchema),
+    })
+
+    const onSubmit: SubmitHandler<LoginFormValues> = async (data) => {
+        try {
+            setIsLoading(true)
+            await login(data)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card className="overflow-hidden p-0">
                 <CardContent className="grid p-0 md:grid-cols-2">
-                <form className="p-6 md:p-8">
+                <form className="p-6 md:p-8" onSubmit={form.handleSubmit(onSubmit)}>
                     <FieldGroup>
                     <div className="flex flex-col items-center gap-2 text-center">
                         <h1 className="text-2xl font-bold">Welcome back</h1>
@@ -28,29 +52,61 @@ export default function LoginForm({
                         Login to your AuthStack account
                         </p>
                     </div>
+                    <Controller
+                        name="email"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid}>
+                                <FieldLabel htmlFor="email">Email</FieldLabel>
+                                <Input
+                                    {...field}
+                                    id="email"
+                                    type="email"
+                                    placeholder="Enter your email"
+                                    aria-invalid={fieldState.invalid}
+                                />
+                                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                            </Field>
+                        )}
+                    />
+                    <Controller
+                        name="password"
+                        control={form.control}
+                        render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid}>
+                                <div className="flex items-center">
+                                    <FieldLabel htmlFor="password">Password</FieldLabel>
+                                    <a href="#" className="ml-auto text-sm underline-offset-2 hover:underline">
+                                        Forgot your password?
+                                    </a>
+                                </div>
+                                <InputGroup>
+                                    <InputGroupInput
+                                        {...field}
+                                        id="password"
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="Enter your password"
+                                        aria-invalid={fieldState.invalid}
+                                    />
+                                    <InputGroupAddon align="inline-end">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword((previous) => !previous)}
+                                            className="cursor-pointer text-muted-foreground hover:text-foreground"
+                                            aria-label={showPassword ? "Hide password" : "Show password"}
+                                        >
+                                            {showPassword ? <EyeIcon className="size-4" /> : <EyeOffIcon className="size-4" />}
+                                        </button>
+                                    </InputGroupAddon>
+                                </InputGroup>
+                                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                            </Field>
+                        )}
+                    />
                     <Field>
-                        <FieldLabel htmlFor="email">Email</FieldLabel>
-                        <Input
-                        id="email"
-                        type="email"
-                        placeholder="m@example.com"
-                        required
-                        />
-                    </Field>
-                    <Field>
-                        <div className="flex items-center">
-                        <FieldLabel htmlFor="password">Password</FieldLabel>
-                        <a
-                            href="#"
-                            className="ml-auto text-sm underline-offset-2 hover:underline"
-                        >
-                            Forgot your password?
-                        </a>
-                        </div>
-                        <Input id="password" type="password" required />
-                    </Field>
-                    <Field>
-                        <Button type="submit">Login</Button>
+                        <Button type="submit" className="cursor-pointer" disabled={isLoading}>
+                            {isLoading ? <Spinner className="size-5" /> : "Login"}
+                        </Button>
                     </Field>
                     <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                         Or continue with

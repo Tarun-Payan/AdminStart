@@ -11,6 +11,7 @@ import { router as apis } from './src/routes/api.js';
 import swaggerUi from 'swagger-ui-express';
 import { generateOpenApiDocument } from "./src/openapi/document.js";
 import { env } from "node:process";
+import cors from "cors";
 
 const app = express();
 
@@ -24,6 +25,10 @@ const db = drizzle({
   }
 });
 
+app.use(cors({
+  origin: env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.static('public'))
 
