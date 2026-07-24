@@ -50,10 +50,14 @@ app.use('/api', apis);
 app.use(errorHandler);
 
 app.get('/', (req, res) => {
-  res.setHeader('Content-Type', 'text/plain')
-  res.send("Hello world hello")
-})
+  res.setHeader('Content-Type', 'text/plain');
+  res.send("Hello world hello");
+});
 
-app.listen(port, () => {
-  console.log(`Server running at http://${hostname}:${port}/`)
-})
+if (!process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`Server running at http://${hostname}:${port}/`);
+  });
+}
+
+export default app;
